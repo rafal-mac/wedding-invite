@@ -762,8 +762,29 @@ INVITED</span>
     function initApp() {
       lucide.createIcons();
       personalize();
+      preloadVoucherFonts();
+      setupSwipe();
     }
     document.addEventListener('DOMContentLoaded', initApp);
+
+    // Swipe the cards left/right with a finger (arrows still work too).
+    function setupSwipe() {
+      const el = document.getElementById('cards-container');
+      let x0 = 0, y0 = 0, tracking = false;
+      el.addEventListener('touchstart', e => {
+        if (e.touches.length !== 1) { tracking = false; return; }
+        x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; tracking = true;
+      }, { passive: true });
+      el.addEventListener('touchend', e => {
+        if (!tracking) return;
+        tracking = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - x0, dy = t.clientY - y0;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+          if (dx < 0) nextCard(); else prevCard();
+        }
+      }, { passive: true });
+    }
 
     // Countdown -> gather at 2pm on 22 Aug 2026 (UK / BST = UTC+1)
     const WEDDING_DATE = new Date('2026-08-22T14:00:00+01:00');
@@ -818,6 +839,7 @@ INVITED</span>
       const overlay = document.getElementById('gift-overlay');
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+      preloadVoucherFonts();
       // draw the foil once the entrance animation settles (card back to scale 1);
       // animationend is primary, the timeout is a fallback so init never gets skipped
       const card = document.getElementById('scratch-card');
@@ -979,24 +1001,55 @@ INVITED</span>
       ctx.restore();
     }
 
+    // Kicked off early (page load + gift open) so the voucher can be drawn synchronously
+    // at click time — awaiting fonts inside the handler would drop the user-activation that
+    // navigator.share needs on iOS.
+    function preloadVoucherFonts() {
+      ["400 40px 'Great Vibes'", "600 60px 'Cormorant Garamond'", "italic 600 40px 'Cormorant Garamond'",
+       "500 30px 'Fredoka'", "700 30px 'Fredoka'"].forEach(f => { try { document.fonts.load(f); } catch (_) {} });
+    }
+
+    function dataURLtoFile(dataurl, filename) {
+      const comma = dataurl.indexOf(',');
+      const mime = (dataurl.slice(0, comma).match(/:(.*?);/) || [])[1] || 'image/png';
+      const bin = atob(dataurl.slice(comma + 1));
+      const u8 = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+      return new File([u8], filename, { type: mime });
+    }
+
+    function saveOrSharePng(dataUrl, filename) {
+      let file = null;
+      try { file = dataURLtoFile(dataUrl, filename); } catch (_) {}
+      // On phones/tablets the Share sheet is the reliable way to keep the image (Save to Photos);
+      // the download attribute is ignored by iOS Safari. Desktop uses a normal download.
+      const canShareFile = file && navigator.canShare && navigator.canShare({ files: [file] });
+      if (canShareFile && navigator.maxTouchPoints > 0) {
+        navigator.share({ files: [file], title: 'Gift voucher' })
+          .catch(err => { if (!err || err.name !== 'AbortError') downloadPng(dataUrl, filename); });
+        return;
+      }
+      downloadPng(dataUrl, filename);
+    }
+
+    function downloadPng(dataUrl, filename) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      a.target = '_blank'; // iOS fallback: opens the image so it can be long-pressed to save
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
     // Voucher is sized big so it stays legible when viewed full-screen on a phone.
-    async function downloadVoucher() {
+    function downloadVoucher() {
       const g = window.CURRENT || { name: null, activity: '', terms: '' };
       const W = 1080, H = 1650;
       const canvas = document.createElement('canvas');
       canvas.width = W; canvas.height = H;
       const ctx = canvas.getContext('2d');
-
-      try {
-        await Promise.all([
-          document.fonts.load("600 96px 'Cormorant Garamond'"),
-          document.fonts.load("italic 600 70px 'Cormorant Garamond'"),
-          document.fonts.load("500 42px 'Fredoka'"),
-          document.fonts.load("700 34px 'Fredoka'"),
-          document.fonts.load("400 84px 'Great Vibes'")
-        ]);
-        await document.fonts.ready;
-      } catch (_) {}
 
       // background + double border
       ctx.fillStyle = '#fffdf5';
@@ -1065,10 +1118,8 @@ INVITED</span>
       ctx.font = "500 36px 'Fredoka', sans-serif";
       ctx.fillText('Date of issue: ' + dateStr, W / 2, 1560);
 
-      const a = document.createElement('a');
-      a.download = 'voucher-' + (g.name ? g.name.toLowerCase() : 'gift') + '.png';
-      a.href = canvas.toDataURL('image/png');
-      a.click();
+      const filename = 'voucher-' + (g.name ? g.name.toLowerCase() : 'gift') + '.png';
+      saveOrSharePng(canvas.toDataURL('image/png'), filename);
     }
 
     function openEnvelope() {
