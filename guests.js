@@ -1,0 +1,22 @@
+// Single source of truth for personalisation.
+// URL needs BOTH ?to=<name> (case-insensitive) AND ?key=<the 8-char key below>.
+// Wrong/missing key -> the invite is locked. Shared by index.html and links.html.
+// NOTE: this is a static site, so this file is downloadable by anyone who digs —
+// the key stops casual snooping (guessing a name), it is NOT real encryption.
+window.GUESTS = {
+  ines:      { name: "Ines",      key: "34cbbff3", prize: "This voucher entitles you to come train with us at the gym within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  anastasia: { name: "Anastasia", key: "5715eb0c", prize: "This voucher entitles you to go watch a movie together with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  angeliki:  { name: "Angeliki",  key: "8bfa4b98", prize: "This voucher entitles you to go to a live music bar with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  palash:    { name: "Palash",    key: "7151787e", prize: "This voucher entitles you to come train with us at the gym within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  yash:      { name: "Yash",      key: "3c8ca3ba", prize: "This voucher entitles you to have a home cooked meal with us at our new place within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  paula:     { name: "Paula",     key: "82595918", prize: "This voucher entitles you to have a picnic in the park with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  matthias:  { name: "Matthias",  key: "982e4804", prize: "This voucher entitles you to have a fun filled board games night with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  sanjana:   { name: "Sanjana",   key: "3ae59426", prize: "This voucher entitles you to have a badminton session with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  david:     { name: "David",     key: "d9b68f6e", prize: "This voucher entitles you to go watch a movie together with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  ula:       { name: "Ula",       key: "ceab967f", prize: "This voucher entitles you to watch a University Challenge episode online with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  dami:      { name: "Dami",      key: "fbd6306f", prize: "This voucher entitles you to have a fun filled board games night with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  ritvik:    { name: "Ritvik",    key: "2ed9099a", prize: "This voucher entitles you to go to a pub quiz with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  julia:     { name: "Julia",     key: "a3c51553", prize: "This voucher entitles you to go to a stand-up comedy show with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  marcin:    { name: "Marcin",    key: "f871c222", prize: "This voucher entitles you to have a home cooked meal with us at our new place within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
+  dhruvi:    { name: "Dhruvi",    key: "99e05b28", prize: "This voucher entitles you to have a badminton session with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." }
+};

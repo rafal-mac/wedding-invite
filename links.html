@@ -2,42 +2,44 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Invite link generator</title>
+<title>Invite links</title>
+<script src="guests.js"></script>
 <style>
-  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #2c2c2c; }
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #2c2c2c; }
   h1 { font-size: 22px; }
   label { display: block; margin: 16px 0 4px; font-size: 14px; font-weight: 600; }
   input { width: 100%; padding: 8px 10px; font-size: 14px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-  button { margin-top: 20px; padding: 10px 18px; font-size: 14px; border: none; border-radius: 6px; background: #5e0404; color: #fff; cursor: pointer; }
-  #out { margin-top: 8px; background: #f5f5f0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  td { padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: middle; font-size: 14px; }
+  td.name { font-weight: 600; white-space: nowrap; }
+  td.link input { font-family: ui-monospace, monospace; font-size: 12px; background: #f7f7f4; }
+  button.copy { padding: 6px 12px; font-size: 13px; border: none; border-radius: 6px; background: #5e0404; color: #fff; cursor: pointer; }
   small { color: #666; }
 </style>
 </head><body>
-<h1>Invite link generator</h1>
-<p><small>Set the base URL once, then generate one link per friend. The card link is URL-encoded for you, so links with their own <code>?</code> query strings won't break.</small></p>
+<h1>Per-friend invite links</h1>
+<p><small>Set your live base URL once — the links update instantly. Send each friend their own link; it drives both the greeting and their scratch-card gift.</small></p>
 
-<label>Base URL (your deployed invite)</label>
-<input id="base" value="https://YOURNAME.github.io/wedding-invite/">
+<label>Base URL</label>
+<input id="base" value="https://rafal-mac.github.io/wedding-invite/" oninput="render()">
 
-<label>Friend's name</label>
-<input id="name" placeholder="Sarah">
-
-<label>Scratch card link</label>
-<input id="card" placeholder="https://scratch-provider.com/abc123">
-
-<button onclick="gen()">Generate link</button>
-
-<label>Their link (click to select, then copy)</label>
-<input id="out" readonly onclick="this.select()">
+<table id="rows"></table>
 
 <script>
-  function gen() {
-    const u = new URL(document.getElementById('base').value.trim());
-    const to = document.getElementById('name').value.trim();
-    const card = document.getElementById('card').value.trim();
-    if (to) u.searchParams.set('to', to);
-    if (card) u.searchParams.set('card', card);
-    document.getElementById('out').value = u.toString();
+  function render() {
+    const base = document.getElementById('base').value.trim();
+    const rows = Object.entries(window.GUESTS).map(([key, g]) => {
+      let link;
+      try { const u = new URL(base); u.searchParams.set('to', key); u.searchParams.set('key', g.key); link = u.toString(); }
+      catch (e) { link = '(invalid base URL)'; }
+      return `<tr>
+        <td class="name">${g.name}</td>
+        <td class="link"><input readonly value="${link}" onclick="this.select()"></td>
+        <td><button class="copy" onclick="navigator.clipboard.writeText('${link}')">Copy</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('rows').innerHTML = rows;
   }
+  render();
 </script>
 </body></html>
