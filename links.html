@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invite link generator</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #2c2c2c; }
+  h1 { font-size: 22px; }
+  label { display: block; margin: 16px 0 4px; font-size: 14px; font-weight: 600; }
+  input { width: 100%; padding: 8px 10px; font-size: 14px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+  button { margin-top: 20px; padding: 10px 18px; font-size: 14px; border: none; border-radius: 6px; background: #5e0404; color: #fff; cursor: pointer; }
+  #out { margin-top: 8px; background: #f5f5f0; }
+  small { color: #666; }
+</style>
+</head><body>
+<h1>Invite link generator</h1>
+<p><small>Set the base URL once, then generate one link per friend. The card link is URL-encoded for you, so links with their own <code>?</code> query strings won't break.</small></p>
+
+<label>Base URL (your deployed invite)</label>
+<input id="base" value="https://YOURNAME.github.io/wedding-invite/">
+
+<label>Friend's name</label>
+<input id="name" placeholder="Sarah">
+
+<label>Scratch card link</label>
+<input id="card" placeholder="https://scratch-provider.com/abc123">
+
+<button onclick="gen()">Generate link</button>
+
+<label>Their link (click to select, then copy)</label>
+<input id="out" readonly onclick="this.select()">
+
+<script>
+  function gen() {
+    const u = new URL(document.getElementById('base').value.trim());
+    const to = document.getElementById('name').value.trim();
+    const card = document.getElementById('card').value.trim();
+    if (to) u.searchParams.set('to', to);
+    if (card) u.searchParams.set('card', card);
+    document.getElementById('out').value = u.toString();
+  }
+</script>
+</body></html>

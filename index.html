@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wedding Invitation</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&amp;family=Josefin+Sans:wght@300;400;500&amp;family=Playfair+Display:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #b8860b;
+      --gold-light: #d4a843;
+      --cream: #fdf8f0;
+      --blush: #f5e6da;
+      --deep-green: #2d4a3e;
+      --sage: #8fae8b;
+      --charcoal: #2c2c2c;
+      --control-h: 44px;
+    }
+
+    body {
+      font-family: 'Josefin Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .font-display {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .app-shell {
+      position: relative;
+      width: 100%;
+      height: calc(100 * min(var(--vh, 1vh), 1vh));
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Envelope */
+    .envelope-wrapper {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    .envelope-wrapper.hidden-state {
+      opacity: 0;
+      transform: translateY(-40px);
+      pointer-events: none;
+    }
+
+    .envelope {
+      position: relative;
+      width: clamp(280px, 85vw, 624px);
+      height: clamp(200px, 60vw, 445px);
+    }
+
+    @media (min-width: 640px) {
+      .envelope {
+        width: clamp(450px, 72vw, 768px);
+        height: clamp(320px, 51vw, 548px);
+      }
+    }
+
+    .envelope-body {
+      position: absolute;
+      inset: 0;
+      background: #d83f2e;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .envelope-seal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: clamp(72px, 18vw, 112px);
+      height: clamp(72px, 18vw, 112px);
+      border-radius: 50%;
+      background: #e5e2dc;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, transform 0.3s ease;
+    }
+
+    .envelope-seal:hover {
+      transform: translateX(-50%) scale(1.1);
+    }
+
+    .envelope-seal.fade-out {
+      opacity: 0;
+    }
+
+    .seal-text {
+      color: white;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(9px, 2.5vw, 11px);
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.3;
+      letter-spacing: 0.05em;
+    }
+
+    .envelope-inner {
+      position: absolute;
+      inset: 0;
+      background: #faf3eb;
+      z-index: 1;
+    }
+
+    .envelope-flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 55%;
+      background: #5e0404;
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+      z-index: 3;
+      transform-origin: top center;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .envelope-flap.opened {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-letter {
+      position: absolute;
+      top: 10%;
+      left: 10%;
+      width: 80%;
+      height: 50%;
+      background: white;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s, transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+    }
+
+    .envelope-letter.slide-out {
+      opacity: 1;
+      transform: translateY(-80px);
+    }
+
+    .envelope-letter span {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: 1.1rem;
+      font-weight: 500;
+      line-height: 0.75;
+    }
+
+    /* Overlay Block */
+    .overlay-block {
+      position: absolute;
+      bottom: 12px;
+      right: 0;
+      width: clamp(180px, 50vw, 380px);
+      background: #5e0404;
+      color: #f5f5f0;
+      padding: clamp(12px, 3vw, 16px);
+      z-index: 25;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      transition: opacity 0.6s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: clamp(160px, 40vw, 240px);
+    }
+
+    .overlay-block.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-4px) rotate(-1deg); }
+      75% { transform: translateX(4px) rotate(1deg); }
+    }
+
+    .overlay-block:hover {
+      animation: wiggle 0.4s ease-in-out infinite;
+    }
+
+    .overlay-headline-tight { line-height: 0.75 !important; }
+    .couple-name-tight { line-height: 0.75 !important; }
+
+    /* Cards */
+    .cards-container {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .cards-container.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .gallery-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .gallery-track {
+      display: flex;
+      gap: clamp(12px, 3vw, 20px);
+      overflow: visible;
+      position: relative;
+      justify-content: flex-start;
+      will-change: transform;
+    }
+
+    .gallery-card {
+      flex: 0 0 85%;
+      min-width: 85%;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .invitation-card-el {
+      background: white;
+      border: 1px solid rgba(184, 134, 11, 0.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0.3s ease;
+      width: 100%;
+      min-height: clamp(420px, 80vw, 600px);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .invitation-card-el:hover {
+      transform: scale(1.03) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12) !important;
+      z-index: 20 !important;
+    }
+
+    .invitation-photo-container-small {
+      overflow: hidden;
+    }
+
+    .invitation-photo-container-small img {
+      transition: transform 0.5s ease;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.4);
+    }
+
+    .invitation-photo-container-small:hover img {
+      transform: scale(1.1);
+    }
+
+    /* Photo gallery */
+    .photo-gallery-container {
+      position: relative;
+      margin: 0 auto;
+      margin-top: 12px;
+    }
+
+    .photo-gallery-image {
+      object-fit: cover;
+      width: 100%;
+      aspect-ratio: 3/4;
+      transition: opacity 0.4s ease;
+      max-height: 280px;
+    }
+
+    .photo-gallery-image-container {
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 3/4;
+      max-height: 280px;
+    }
+
+    .photo-gallery-image-container .photo-gallery-image {
+      transition: transform 0.5s ease;
+    }
+
+    .photo-gallery-image-container:hover .photo-gallery-image {
+      transform: scale(1.1);
+    }
+
+    .photo-gallery-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .photo-nav-button {
+      width: auto;
+      height: auto;
+      border: none;
+      background: transparent;
+      color: #5e0404;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: opacity 0.2s ease;
+    }
+
+    .photo-nav-button:hover:not(:disabled) { opacity: 0.7; }
+    .photo-nav-button:disabled { opacity: 0; pointer-events: none; }
+
+    .photo-dots { display: flex; justify-content: center; gap: 6px; }
+
+    .photo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 2px solid #5e0404;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .photo-dot.active { background: #5e0404; }
+
+    /* Countdown */
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      gap: clamp(6px, 2vw, 16px);
+      margin-top: clamp(24px, 8vw, 80px);
+    }
+
+    .countdown-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: clamp(56px, 16vw, 90px);
+      height: clamp(56px, 16vw, 90px);
+      background: #d83f2e;
+      gap: 4px;
+    }
+
+    .countdown-number {
+      font-size: clamp(22px, 6vw, 36px);
+      font-weight: 700;
+      color: #e9e5e1;
+      line-height: 1;
+    }
+
+    .countdown-label {
+      font-size: clamp(8px, 2.5vw, 11px);
+      color: #e9e5e1;
+      letter-spacing: 0.05em;
+      font-weight: 500;
+    }
+
+    /* Controls Overlay */
+    .controls-overlay {
+      position: fixed;
+      bottom: clamp(12px, 3vw, 24px);
+      left: clamp(8px, 2vw, 24px);
+      right: clamp(8px, 2vw, 24px);
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .controls-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .controls-overlay > * { pointer-events: auto; }
+
+    .nav-buttons-container { display: flex; gap: clamp(8px, 2vw, 12px); margin-left: auto; }
+
+    .nav-button-fixed {
+      width: var(--control-h);
+      height: var(--control-h);
+      border: none;
+      border-radius: 50%;
+      background: #5e0404;
+      color: #e9e5e1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s ease;
+    }
+
+    .nav-button-fixed:hover:not(:disabled) { transform: scale(1.05); }
+    .nav-button-fixed:disabled { opacity: 0; pointer-events: none; }
+
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #edeced;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active { background: #edeced; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-delay-1 { animation: fadeInUp 0.6s ease 0.1s both; }
+    .card-delay-2 { animation: fadeInUp 0.6s ease 0.3s both; }
+    .card-delay-3 { animation: fadeInUp 0.6s ease 0.5s both; }
+
+    /* Schedule grid responsive */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      gap: clamp(16px, 5vw, 48px);
+      margin-top: clamp(24px, 6vw, 48px);
+      margin-bottom: clamp(24px, 6vw, 48px);
+      text-align: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 420px) {
+      .schedule-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+
+    /* Venue grid responsive */
+    .venue-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: clamp(8px, 2vw, 16px);
+      text-align: center;
+      padding-top: 16px;
+    }
+
+    @media (max-width: 420px) {
+      .venue-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .venue-grid > div { text-align: center !important; }
+    }
+
+    /* Photo grid responsive */
+    .photo-page-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(6px, 2vw, 12px);
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 380px) {
+      .photo-page-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      :root { --control-h: 40px; }
+    }
+  </style>
+ </head>
+ <body data-template-id="__page-root" class="w-full min-h-screen" style="background: #fdf8f0;">
+  <div class="app-shell">
+   <!-- Envelope -->
+   <div class="envelope-wrapper" id="envelope-wrapper" onclick="openEnvelope()">
+    <div class="envelope" id="envelope">
+     <div class="envelope-seal">
+      <span class="seal-text" data-template-id="seal-text" style="color: rgb(44, 44, 44); font-weight: 400; font-style: normal; font-size: 14px;">YOU'RE
+INVITED</span>
+     </div>
+     <div class="envelope-flap" id="envelope-flap"></div>
+     <div class="envelope-letter">
+      <span data-template-id="envelope-letter-text" class="canva-text" style="color: rgb(184, 134, 11); font-weight: 400; font-style: normal; font-size: 18px;">You're Invited</span>
+     </div>
+     <div class="envelope-inner"></div>
+     <div class="envelope-body"></div>
+    </div>
+    <div class="overlay-block" id="overlay-block">
+     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: clamp(16px, 5vw, 32px);">
+      <p data-template-id="overlay-helper" class="canva-text text-xs" style="color: rgb(216, 63, 46); letter-spacing: 0.15em; margin: 0px; font-weight: 400; font-style: normal; font-size: 12px;">TAP TO OPEN</p>
+      <p data-template-id="overlay-helper-right" class="canva-text text-xs" style="color: rgb(216, 63, 46); letter-spacing: 0.15em; margin: 0px; font-weight: 400; font-style: normal; font-size: 12px;">CAN'T WAIT</p>
+     </div>
+     <h3 data-template-id="overlay-headline" class="canva-text font-display overlay-headline-tight" style="color: rgb(216, 63, 46); font-weight: 400; margin: 0px; line-height: 0.9; font-size: 54px; font-style: normal;">TIME TO
+CELEBRATE</h3>
+     <p data-template-id="guest-greeting" class="canva-text" style="color: rgb(216, 63, 46); letter-spacing: 0.15em; margin: 12px 0 0; font-weight: 500; font-size: 14px; display: none;"></p>
+    </div>
+   </div><!-- Cards -->
+   <div class="cards-container" id="cards-container">
+    <div class="px-4 h-full flex items-center" style="width: 100%;">
+     <div class="gallery-wrapper">
+      <div class="relative">
+       <div class="gallery-track" id="gallery-track">
+        <!-- Card 1: Invitation -->
+        <div class="gallery-card" data-card="0">
+         <div class="invitation-card-el card-delay-1 max-w-full mx-auto relative flex flex-col items-center justify-start" data-template-id="invitation-card" style="background: #5e0404; padding: clamp(16px, 4vw, 24px);">
+          <h1 data-template-id="couple-name-first" class="canva-text font-display text-center couple-name-tight" style="color: rgb(216, 63, 46); margin: 0px 0px 24px; letter-spacing: -7px; line-height: 0.25; font-size: 160px; font-weight: 400; font-style: normal;">AMARA
+&amp;MARK</h1>
+          <div class="invitation-photo-container-small" style="width: clamp(100px, 28vw, 140px); height: clamp(100px, 28vw, 140px); margin: 0 auto 24px;">
+           <img data-template-id="invitation-photo" loading="lazy" class="canva-image" style="width: 100%; height: 100%; object-fit: cover; object-position: 38% center;" src="images/couple.jpg" alt="Couple Relaxing in Bed Reading a Magazine">
+          </div>
+          <div class="venue-grid">
+           <div style="text-align: left;">
+            <p data-template-id="venue-date" class="canva-text" style="color: rgb(216, 63, 46); margin: 0px; line-height: 1.3; font-size: 13px; font-weight: 400; font-style: normal;">OCT 24
+2026</p>
+           </div>
+           <div>
+            <p data-template-id="venue-name" class="canva-text font-display" style="color: rgb(216, 63, 46); margin: 0px; line-height: 1.3; font-size: 13px; font-weight: 400; font-style: normal;">BRILLERTON ESTATE
+123 ANYWHERE ST, ANY CITY</p>
+           </div>
+           <div style="text-align: right;">
+            <p data-template-id="venue-day-time" class="canva-text" style="color: rgb(216, 63, 46); margin: 0px; line-height: 1.3; font-size: 13px; font-weight: 400; font-style: normal;">SUN
+4:00 PM</p>
+           </div>
+          </div>
+         </div>
+        </div><!-- Card 2: Dress Code -->
+        <div class="gallery-card" data-card="1">
+         <div class="invitation-card-el card-delay-2 max-w-full mx-auto flex flex-col" data-template-id="dresscode-card" style="background: rgb(216, 63, 46); flex: 1 1 0%;">
+          <div style="padding: clamp(16px, 4vw, 24px); display: flex; flex-direction: column; flex: 1;">
+           <div class="text-center mb-6" style="padding-top: 12px;">
+            <p data-template-id="dresscode-eyebrow" class="canva-text text-xs tracking-wider uppercase mb-2" style="color: rgb(94, 4, 4); font-weight: 400; font-style: normal; font-size: 13px;">dress code</p>
+            <h2 data-template-id="dresscode-title" class="canva-text font-display" style="color: rgb(94, 4, 4); letter-spacing: -4px; margin: 0px; font-size: 85px; line-height: 0.55 !important; font-weight: 400; font-style: normal;">GARDEN PARTY</h2>
+           </div>
+           <div class="photo-gallery-container">
+            <div id="photo-page-0" class="photo-page photo-page-grid">
+             <div class="photo-gallery-image-container"><img data-template-id="dresscode-photo-1" loading="lazy" class="canva-image photo-gallery-image" src="images/dresscode-1.jpg" alt="Child Tossing an Orange Outdoors on a Sunny Day">
+             </div>
+             <div class="photo-gallery-image-container"><img data-template-id="dresscode-photo-2" loading="lazy" class="canva-image photo-gallery-image" src="images/dresscode-2.jpg" alt="Couple Kissing at Table in Garden">
+             </div>
+             <div class="photo-gallery-image-container"><img data-template-id="dresscode-photo-3" loading="lazy" class="canva-image photo-gallery-image" src="images/dresscode-3.jpg" alt="Outdoor Dining Table with Food in Countryside">
+             </div>
+            </div>
+            <div id="photo-page-1" class="photo-page photo-page-grid" style="display: none;">
+             <div class="photo-gallery-image-container"><img data-template-id="dresscode-photo-4" loading="lazy" class="canva-image photo-gallery-image" src="images/dresscode-4.jpg" alt="Woman Reading at Outdoor Brunch Table">
+             </div>
+             <div class="photo-gallery-image-container"><img data-template-id="dresscode-photo-5" loading="lazy" class="canva-image photo-gallery-image" src="images/dresscode-5.jpg" alt="Still Life with Newspaper, Swimsuit, and Clementines">
+             </div>
+             <div class="photo-gallery-image-container"><img data-template-id="dresscode-photo-6" loading="lazy" class="canva-image photo-gallery-image" src="images/dresscode-6.jpg" alt="Man Drinking Coffee Outdoors While Writing">
+             </div>
+            </div>
+            <div class="photo-gallery-controls">
+             <button class="photo-nav-button" id="photo-prev" onclick="prevPhoto()" aria-label="Previous photo page"><i data-lucide="chevron-left" style="width: 18px; height: 18px;"></i></button>
+             <div class="photo-dots" id="photo-dots"></div><button class="photo-nav-button" id="photo-next" onclick="nextPhoto()" aria-label="Next photo page"><i data-lucide="chevron-right" style="width: 18px; height: 18px;"></i></button>
+            </div>
+           </div>
+           <p data-template-id="dresscode-description" class="canva-text text-sm leading-relaxed text-center" style="color: rgb(94, 4, 4); margin-top: auto; font-weight: 400; font-style: normal; font-size: 13px;">COQUETTE ITALIAN SUMMER</p>
+          </div>
+         </div>
+        </div><!-- Card 3: Registry/Schedule -->
+        <div class="gallery-card" data-card="2">
+         <div class="invitation-card-el card-delay-3 max-w-full mx-auto" data-template-id="registry-card" style="background: #5e0404;">
+          <div style="padding: clamp(16px, 4vw, 24px); text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: between;">
+           <div style="padding-top: 12px;">
+            <p data-template-id="registry-eyebrow" class="canva-text text-xs tracking-wider uppercase mb-2" style="color: rgb(216, 63, 46); text-align: center; font-weight: 400; font-style: normal; font-size: 13px;">schedule</p>
+            <h2 data-template-id="registry-title" class="canva-text font-display mb-2" style="color: rgb(216, 63, 46); line-height: 0.25; margin-top: 0px; margin-bottom: 32px; font-size: 85px; font-weight: 400; font-style: normal;">BE OUR GUEST</h2>
+            <div class="schedule-grid">
+             <div>
+              <p data-template-id="schedule-col-1-label" class="canva-text text-xs tracking-wider uppercase mb-2" style="color: rgb(216, 63, 46); font-weight: 400; font-style: normal; font-size: 16px;">CEREMONY</p>
+              <p data-template-id="schedule-col-1-time" class="canva-text font-semibold" style="color: rgb(216, 63, 46); font-size: 26px; font-weight: 400; font-style: normal;">4:00 PM</p>
+             </div>
+             <div>
+              <p data-template-id="schedule-col-2-label" class="canva-text text-xs tracking-wider uppercase mb-2" style="color: rgb(216, 63, 46); font-weight: 400; font-style: normal; font-size: 16px;">COCKTAILS</p>
+              <p data-template-id="schedule-col-2-time" class="canva-text font-semibold" style="color: rgb(216, 63, 46); font-size: 26px; font-weight: 400; font-style: normal;">6:00 PM</p>
+             </div>
+             <div>
+              <p data-template-id="schedule-col-3-label" class="canva-text text-xs tracking-wider uppercase mb-2" style="color: rgb(216, 63, 46); font-weight: 400; font-style: normal; font-size: 16px;">RECEPTION</p>
+              <p data-template-id="schedule-col-3-time" class="canva-text font-semibold" style="color: rgb(216, 63, 46); font-size: 26px; font-weight: 400; font-style: normal;">7:00 PM</p>
+             </div>
+            </div>
+            <div id="countdown-timer" class="countdown-timer">
+             <div class="countdown-box">
+              <div data-template-id="countdown-days-text" class="canva-text countdown-number" style="color: rgb(94, 4, 4); font-size: 32px;">00</div>
+              <div data-template-id="countdown-days-label" class="canva-text countdown-label" style="color: rgb(94, 4, 4); font-weight: 400; font-style: normal; font-size: 13px;">Days</div>
+             </div>
+             <div class="countdown-box">
+              <div data-template-id="countdown-hours-text" class="canva-text countdown-number" style="color: rgb(94, 4, 4); font-size: 32px;">00</div>
+              <div data-template-id="countdown-hours-label" class="canva-text countdown-label" style="color: rgb(94, 4, 4); font-weight: 400; font-style: normal; font-size: 13px;">Hours</div>
+             </div>
+             <div class="countdown-box">
+              <div data-template-id="countdown-minutes-text" class="canva-text countdown-number" style="color: rgb(94, 4, 4); font-size: 32px;">00</div>
+              <div data-template-id="countdown-minutes-label" class="canva-text countdown-label" style="color: rgb(94, 4, 4); font-weight: 400; font-style: normal; font-size: 13px;">Minutes</div>
+             </div>
+             <div class="countdown-box">
+              <div data-template-id="countdown-seconds-text" class="canva-text countdown-number" style="color: rgb(94, 4, 4); font-size: 32px;">00</div>
+              <div data-template-id="countdown-seconds-label" class="canva-text countdown-label" style="color: rgb(94, 4, 4); font-weight: 400; font-style: normal; font-size: 13px;">Seconds</div>
+             </div>
+            </div>
+           </div>
+           <p data-template-id="monetary-gift-blurb" class="canva-text text-sm leading-relaxed" style="color: rgb(216, 63, 46); margin-top: auto; font-weight: 400; font-style: normal; font-size: 13px;">WE CAN'T WAIT TO CELEBRATE WITH YOU</p><a href="#" target="_blank" rel="noopener noreferrer" data-template-id="scratch-card-link" class="canva-link text-sm mt-4" style="color: rgb(216, 63, 46); text-decoration: underline; display: inline-block; text-align: center; width: 100%; font-weight: 400; font-style: normal; font-size: 13px;">Scratch Card</a>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Controls -->
+  <div class="controls-overlay" id="controls-overlay">
+   <div class="pagination-container">
+    <button class="dot active" data-dot="0" onclick="goToCard(0)" aria-label="Go to card 1"></button> <button class="dot" data-dot="1" onclick="goToCard(1)" aria-label="Go to card 2"></button> <button class="dot" data-dot="2" onclick="goToCard(2)" aria-label="Go to card 3"></button>
+   </div>
+   <div class="nav-buttons-container">
+    <button class="nav-button-fixed" id="nav-prev" onclick="prevCard()" aria-label="Previous card"><i data-lucide="chevron-left" style="width: 20px; height: 20px;"></i></button> <button class="nav-button-fixed" id="nav-next" onclick="nextCard()" aria-label="Next card"><i data-lucide="chevron-right" style="width: 20px; height: 20px;"></i></button>
+   </div>
+  </div>
+  <script>
+    let envelopeOpened = false;
+    let currentCard = 0;
+    const totalCards = 3;
+    let currentPhotoPage = 0;
+    const totalPhotosPages = 2;
+
+    // Per-friend personalisation from the URL: ?to=Name&card=https://scratch-link
+    function personalize() {
+      const params = new URLSearchParams(location.search);
+      const to = params.get('to');
+      const card = params.get('card');
+      if (to) {
+        const greeting = document.querySelector('[data-template-id="guest-greeting"]');
+        greeting.textContent = `FOR ${to.toUpperCase()}`;
+        greeting.style.display = 'block';
+      }
+      const link = document.querySelector('[data-template-id="scratch-card-link"]');
+      if (card) {
+        link.href = card;
+      } else {
+        link.style.display = 'none'; // no card link for this guest -> hide the dead button
+      }
+    }
+
+    function initApp() {
+      lucide.createIcons();
+      personalize();
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+
+    const WEDDING_DATE = new Date('2026-10-24T00:00:00Z');
+    let countdownInterval = null;
+
+    function updateCountdownTimer() {
+      const now = new Date();
+      const diff = WEDDING_DATE - now;
+      let days = 0, hours = 0, minutes = 0, seconds = 0;
+      if (diff > 0) {
+        days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      }
+      document.querySelector('[data-template-id="countdown-days-text"]').textContent = String(days).padStart(2, '0');
+      document.querySelector('[data-template-id="countdown-hours-text"]').textContent = String(hours).padStart(2, '0');
+      document.querySelector('[data-template-id="countdown-minutes-text"]').textContent = String(minutes).padStart(2, '0');
+      document.querySelector('[data-template-id="countdown-seconds-text"]').textContent = String(seconds).padStart(2, '0');
+    }
+
+    function startCountdownTimer() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      updateCountdownTimer();
+      countdownInterval = setInterval(updateCountdownTimer, 1000);
+    }
+
+    function initPhotoGallery() {
+      const container = document.getElementById('photo-dots');
+      container.innerHTML = '';
+      for (let i = 0; i < totalPhotosPages; i++) {
+        const dot = document.createElement('button');
+        dot.className = `photo-dot ${i === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToPhotoPage(i);
+        dot.setAttribute('aria-label', `Go to photo page ${i + 1}`);
+        container.appendChild(dot);
+      }
+      updatePhotoView();
+    }
+
+    function updatePhotoView() {
+      for (let i = 0; i < totalPhotosPages; i++) {
+        const page = document.getElementById(`photo-page-${i}`);
+        if (page) page.style.display = i === currentPhotoPage ? 'grid' : 'none';
+      }
+      document.querySelectorAll('.photo-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentPhotoPage);
+      });
+      document.getElementById('photo-prev').disabled = currentPhotoPage === 0;
+      document.getElementById('photo-next').disabled = currentPhotoPage === totalPhotosPages - 1;
+      lucide.createIcons();
+    }
+
+    function nextPhoto() { if (currentPhotoPage < totalPhotosPages - 1) { currentPhotoPage++; updatePhotoView(); } }
+    function prevPhoto() { if (currentPhotoPage > 0) { currentPhotoPage--; updatePhotoView(); } }
+    function goToPhotoPage(i) { currentPhotoPage = Math.max(0, Math.min(i, totalPhotosPages - 1)); updatePhotoView(); }
+
+    function updateGalleryView() {
+      const track = document.getElementById('gallery-track');
+      const wrapper = track.parentElement;
+      const wrapperWidth = wrapper.offsetWidth;
+      const cardWidthPx = wrapperWidth * 0.85;
+      const gapPx = parseFloat(getComputedStyle(track).gap) || 16;
+      const targetCardCenter = (currentCard * (cardWidthPx + gapPx)) + (cardWidthPx / 2);
+      const translateX = (wrapperWidth / 2) - targetCardCenter;
+      track.style.transform = `translateX(${translateX}px)`;
+      document.getElementById('nav-prev').disabled = currentCard === 0;
+      document.getElementById('nav-next').disabled = currentCard === totalCards - 1;
+      document.querySelectorAll('.dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentCard);
+      });
+    }
+
+    window.addEventListener('resize', () => { if (envelopeOpened) updateGalleryView(); });
+
+    function nextCard() { if (currentCard < totalCards - 1) { currentCard++; updateGalleryView(); } }
+    function prevCard() { if (currentCard > 0) { currentCard--; updateGalleryView(); } }
+    function goToCard(i) { currentCard = Math.max(0, Math.min(i, totalCards - 1)); updateGalleryView(); }
+
+    function openEnvelope() {
+      if (envelopeOpened) return;
+      envelopeOpened = true;
+      const wrapper = document.getElementById('envelope-wrapper');
+      const flap = document.getElementById('envelope-flap');
+      const seal = document.querySelector('.envelope-seal');
+      const letter = document.querySelector('.envelope-letter');
+      const cards = document.getElementById('cards-container');
+      const overlay = document.getElementById('controls-overlay');
+      const overlayBlock = document.getElementById('overlay-block');
+      currentCard = 0;
+      seal.classList.add('fade-out');
+      overlayBlock.classList.add('fade-out');
+      flap.classList.add('opened');
+      setTimeout(() => { letter.classList.add('slide-out'); }, 100);
+      setTimeout(() => {
+        wrapper.classList.add('hidden-state');
+        cards.classList.add('visible');
+        overlay.classList.add('visible');
+        updateGalleryView();
+        initPhotoGallery();
+        startCountdownTimer();
+        lucide.createIcons();
+      }, 1000);
+    }
+  </script>
+
+</body></html>
