@@ -280,9 +280,9 @@
       justify-content: center;
       padding: 24px 16px;
       overflow-y: auto;
-      background: rgba(46, 4, 4, 0.78);
-      -webkit-backdrop-filter: blur(3px);
-      backdrop-filter: blur(3px);
+      background: rgba(74, 46, 61, 0.55);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -324,14 +324,13 @@
       padding: clamp(20px, 5vw, 36px);
       position: relative;
       overflow: hidden;
-      transform: scale(0.4) rotate(-8deg);
+      transform: scale(0.92);
       opacity: 0;
     }
-    .gift-overlay.open .scratch-card-el { animation: giftPop 0.7s cubic-bezier(0.2, 1.5, 0.35, 1) 0.12s forwards; }
+    .gift-overlay.open .scratch-card-el { animation: giftPop 0.4s ease-out forwards; }
     @keyframes giftPop {
-      0%   { transform: scale(0.4) rotate(-8deg); opacity: 0; }
-      55%  { transform: scale(1.06) rotate(2deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0); opacity: 1; }
+      from { transform: scale(0.92); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
     }
 
     .scratch-title {
@@ -840,13 +839,7 @@ INVITED</span>
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
       preloadVoucherFonts();
-      // draw the foil once the entrance animation settles (card back to scale 1);
-      // animationend is primary, the timeout is a fallback so init never gets skipped
-      const card = document.getElementById('scratch-card');
-      let ran = false;
-      const run = () => { if (ran) return; ran = true; card.removeEventListener('animationend', run); initScratch(); };
-      card.addEventListener('animationend', run);
-      setTimeout(run, 900);
+      initScratch(); // paint the foil right away so the card pops in already covered — no cream flash
     }
     function closeGift() {
       document.getElementById('gift-overlay').classList.remove('open');
@@ -858,21 +851,22 @@ INVITED</span>
     function initScratch() {
       if (scratchInit) return;
       const canvas = document.getElementById('scratch-canvas');
-      const stage = document.getElementById('scratch-stage');
-      const rect = stage.getBoundingClientRect();
-      if (rect.width === 0) return;
+      // clientWidth/Height give the canvas's own rendered box, ignoring the pop-in transform,
+      // so we can paint the foil immediately (no cream flash) and scratch coords line up exactly.
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return;
       scratchInit = true;
 
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.round(rect.width * dpr);
-      canvas.height = Math.round(rect.height * dpr);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       ctx.scale(dpr, dpr);
-      drawFoil(ctx, rect.width, rect.height);
+      drawFoil(ctx, w, h);
       // foil is now covering the stage, so it's safe to reveal the prize behind it
       document.getElementById('scratch-prize').style.visibility = 'visible';
 
-      const radius = Math.max(18, rect.width * 0.07);
+      const radius = Math.max(18, w * 0.07);
       let drawing = false, moves = 0, done = false;
 
       const point = e => {
