@@ -1026,23 +1026,27 @@ INVITED</span>
 
     function saveOrSharePng(dataUrl, filename) {
       const ua = navigator.userAgent;
-      // Only iOS actually needs the Share sheet — its Safari (and every in-app webview on iOS)
-      // ignores <a download> for images. Android and desktop download straight to the device.
       const isIOS = /iP(hone|od|ad)/.test(ua) || (/Mac/.test(ua) && navigator.maxTouchPoints > 1);
-      if (isIOS) {
+      // In-app browsers (Messenger, Facebook, Instagram, etc.) block <a download> — it errors
+      // with "Page can't be loaded" — so, like iOS, they must save via the Share sheet.
+      const inApp = /FB_IAB|FBAN|FBAV|FB4A|Instagram|Line\/|Snapchat|MicroMessenger|WhatsApp|Pinterest|Twitter|musical_ly|BytedanceWebview/i.test(ua);
+
+      if (isIOS || inApp) {
         let file = null;
         try { file = dataURLtoFile(dataUrl, filename); } catch (_) {}
         if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], title: 'Gift voucher' })
-            .catch(err => { if (!err || err.name !== 'AbortError') downloadPng(dataUrl, filename); });
+            .catch(err => { if (!err || err.name !== 'AbortError') openPng(dataUrl); });
           return;
         }
+        openPng(dataUrl); // webview with no Share support: open the image so it can be saved
+        return;
       }
-      downloadPng(dataUrl, filename);
+      downloadPng(dataUrl, filename); // real browser (Android Chrome / desktop) → straight to device
     }
 
     function downloadPng(dataUrl, filename) {
-      // A blob URL downloads more reliably than a data: URL in Android in-app browsers.
+      // A blob URL downloads more reliably than a data: URL in real browsers.
       let href = dataUrl, objectUrl = null;
       try { objectUrl = URL.createObjectURL(dataURLtoFile(dataUrl, filename)); href = objectUrl; } catch (_) {}
       const a = document.createElement('a');
@@ -1053,6 +1057,16 @@ INVITED</span>
       a.click();
       a.remove();
       if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
+    }
+
+    // Last resort for locked-down webviews: open the image so it can be long-pressed / saved.
+    function openPng(dataUrl) {
+      let win = null;
+      try {
+        const href = URL.createObjectURL(dataURLtoFile(dataUrl, 'voucher.png'));
+        win = window.open(href, '_blank');
+      } catch (_) {}
+      if (!win) { try { alert('To save your voucher, open this invite in your browser (tap the ⋮ menu → Open in browser).'); } catch (_) {} }
     }
 
     // Voucher is sized big so it stays legible when viewed full-screen on a phone.
