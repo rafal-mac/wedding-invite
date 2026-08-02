@@ -2,9 +2,21 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Wedding Invitation</title>
+  <title>You're invited 💌</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
   <link rel="apple-touch-icon" href="cover-image.jpg">
+  <!-- Link preview (kept deliberately mysterious: just the sealed envelope, no names/details) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="You're invited 💌">
+  <meta property="og:description" content="Tap to open your personal invitation.">
+  <meta property="og:image" content="https://rafal-mac.github.io/wedding-invite/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://rafal-mac.github.io/wedding-invite/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="You're invited 💌">
+  <meta name="twitter:description" content="Tap to open your personal invitation.">
+  <meta name="twitter:image" content="https://rafal-mac.github.io/wedding-invite/og-image.png">
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="guests.js"></script>
@@ -589,7 +601,7 @@ INVITED</span>
      <div style="margin-bottom: clamp(16px, 5vw, 32px);">
       <p class="text-xs" style="color: var(--ink); letter-spacing: 0.15em; margin: 0px; font-weight: 400; font-size: 12px;">TAP TO OPEN</p>
      </div>
-     <h3 class="font-display overlay-headline-tight" style="color: var(--ink); font-weight: 400; margin: 0px; font-size: clamp(22px, 7vw, 54px);">Knot your average day</h3>
+     <h3 class="font-display overlay-headline-tight" style="color: var(--ink); font-weight: 400; margin: 0px; font-size: clamp(22px, 7vw, 54px);">Knot your average day!</h3>
      <p data-template-id="guest-greeting" style="color: var(--ink); letter-spacing: 0.15em; margin: 12px 0 0; font-weight: 500; font-size: 14px; display: none;"></p>
      </div>
     </div>
@@ -1013,28 +1025,34 @@ INVITED</span>
     }
 
     function saveOrSharePng(dataUrl, filename) {
-      let file = null;
-      try { file = dataURLtoFile(dataUrl, filename); } catch (_) {}
-      // On phones/tablets the Share sheet is the reliable way to keep the image (Save to Photos);
-      // the download attribute is ignored by iOS Safari. Desktop uses a normal download.
-      const canShareFile = file && navigator.canShare && navigator.canShare({ files: [file] });
-      if (canShareFile && navigator.maxTouchPoints > 0) {
-        navigator.share({ files: [file], title: 'Gift voucher' })
-          .catch(err => { if (!err || err.name !== 'AbortError') downloadPng(dataUrl, filename); });
-        return;
+      const ua = navigator.userAgent;
+      // Only iOS actually needs the Share sheet — its Safari (and every in-app webview on iOS)
+      // ignores <a download> for images. Android and desktop download straight to the device.
+      const isIOS = /iP(hone|od|ad)/.test(ua) || (/Mac/.test(ua) && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        let file = null;
+        try { file = dataURLtoFile(dataUrl, filename); } catch (_) {}
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: 'Gift voucher' })
+            .catch(err => { if (!err || err.name !== 'AbortError') downloadPng(dataUrl, filename); });
+          return;
+        }
       }
       downloadPng(dataUrl, filename);
     }
 
     function downloadPng(dataUrl, filename) {
+      // A blob URL downloads more reliably than a data: URL in Android in-app browsers.
+      let href = dataUrl, objectUrl = null;
+      try { objectUrl = URL.createObjectURL(dataURLtoFile(dataUrl, filename)); href = objectUrl; } catch (_) {}
       const a = document.createElement('a');
-      a.href = dataUrl;
+      a.href = href;
       a.download = filename;
-      a.target = '_blank'; // iOS fallback: opens the image so it can be long-pressed to save
       a.rel = 'noopener';
       document.body.appendChild(a);
       a.click();
       a.remove();
+      if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl), 4000);
     }
 
     // Voucher is sized big so it stays legible when viewed full-screen on a phone.
