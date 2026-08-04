@@ -749,7 +749,65 @@ INVITED</span>
       return a.charAt(0).toUpperCase() + a.slice(1) + '!';
     }
 
-    // Per-friend personalisation from ?to=<name>
+    // Polish translation — a flat, one-off map (this is the only non-English language).
+    // NB: Luckiest Guy (scratch title/activity) has no Polish glyphs, so those two strings
+    // deliberately avoid diacritics; every other string uses a Polish-supporting font.
+    const PL = {
+      seal: 'JESTEŚCIE<br>ZAPROSZENI',
+      letter: 'Zaproszenie',
+      tapToOpen: 'DOTKNIJ, BY OTWORZYĆ',
+      headline: 'Nie taki zwykły dzień',
+      card1Eyebrow: 'Ceremonia zaślubin',
+      names: 'Sanchari<br>i Rafał',
+      date: '22 sierpnia 2026',
+      dayTime: 'Sobota · 14:00',
+      dressEyebrow: 'Strój',
+      dressDisclaimer: '*to nie są przykłady stroju',
+      civil: 'Bądźmy cywilizowani ;)',
+      agendaEyebrow: 'Plan dnia',
+      beOurGuest: 'Bądźcie<br>Gośćmi',
+      agenda: [['Zbiórka', '14:00'], ['Ceremonia', '14:30'], ['Przyjęcie', '16:30']],
+      countdown: ['Dni', 'Godziny', 'Minuty', 'Sekundy'],
+      blurb: 'Nie możemy się doczekać, aby świętować z Wami',
+      revealGift: '🎁 Odkryjcie prezent',
+      scratchTitle: 'Drobny<br>prezent dla Was!',
+      scratchSub: '👇 Zdrap złoto, aby odkryć',
+      scratchHint: 'Ważny przez rok 💛',
+      download: '⬇️ Pobierz bon'
+    };
+
+    function translateToPolish() {
+      document.documentElement.lang = 'pl';
+      const set = (sel, html) => { const el = document.querySelector(sel); if (el) el.innerHTML = html; };
+      set('.seal-text', PL.seal);
+      set('.envelope-letter span', PL.letter);
+      set('#overlay-block .text-xs', PL.tapToOpen);
+      set('.overlay-headline-tight', PL.headline);
+      set('[data-card="0"] .eyebrow', PL.card1Eyebrow);
+      set('[data-card="0"] h1', PL.names);
+      const d = document.querySelectorAll('[data-card="0"] .detail-row span');
+      if (d[0]) d[0].textContent = PL.date;
+      if (d[1]) d[1].textContent = PL.dayTime;
+      set('[data-card="1"] .eyebrow', PL.dressEyebrow);
+      set('[data-card="1"] p[style*="italic"]', PL.dressDisclaimer);
+      set('[data-card="1"] .fancy-line', PL.civil);
+      set('[data-card="2"] .eyebrow', PL.agendaEyebrow);
+      set('[data-card="2"] h2', PL.beOurGuest);
+      const labels = document.querySelectorAll('[data-card="2"] .agenda-label');
+      const times = document.querySelectorAll('[data-card="2"] .agenda-time');
+      PL.agenda.forEach((a, i) => { if (labels[i]) labels[i].textContent = a[0]; if (times[i]) times[i].textContent = a[1]; });
+      document.querySelectorAll('[data-card="2"] .countdown-label').forEach((el, i) => { if (PL.countdown[i]) el.textContent = PL.countdown[i]; });
+      set('[data-card="2"] .fancy-line', PL.blurb);
+      set('.gift-cta', PL.revealGift);
+      set('.scratch-title', PL.scratchTitle);
+      const subs = document.querySelectorAll('#scratch-card .scratch-sub');
+      if (subs[0]) subs[0].innerHTML = PL.scratchSub;
+      const hint = document.getElementById('scratch-hint');
+      if (hint) hint.innerHTML = PL.scratchHint;
+      set('#gift-download', PL.download);
+    }
+
+    // Per-friend personalisation from ?to=<name>&key=<key>
     function personalize() {
       const params = new URLSearchParams(location.search);
       const key = (params.get('to') || '').trim().toLowerCase();
@@ -760,14 +818,19 @@ INVITED</span>
         document.getElementById('lock-screen').style.display = 'flex';
         return;
       }
+      const isPl = guest.lang === 'pl';
       const greeting = document.querySelector('[data-template-id="guest-greeting"]');
       const activity = document.getElementById('scratch-activity');
       const terms = document.getElementById('scratch-terms');
-      greeting.textContent = `FOR ${guest.name.toUpperCase()}`;
+      const activityText = guest.activity || prettyActivity(guest.prize);
+      const termsText = guest.terms || guest.prize;
+      const greetName = (isPl && guest.greetName) ? guest.greetName : guest.name;
+      greeting.textContent = `${isPl ? 'DLA' : 'FOR'} ${greetName.toUpperCase()}`;
       greeting.style.display = 'block';
-      activity.textContent = prettyActivity(guest.prize);
-      terms.textContent = guest.prize;
-      window.CURRENT = { name: guest.name, activity: activity.textContent, terms: guest.prize };
+      activity.textContent = activityText;
+      terms.textContent = termsText;
+      window.CURRENT = { name: guest.name, greetName: greetName, activity: activityText, terms: termsText, lang: isPl ? 'pl' : 'en' };
+      if (isPl) translateToPolish();
     }
 
     function initApp() {
@@ -925,7 +988,8 @@ INVITED</span>
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = `bold ${Math.max(16, w * 0.07)}px Fredoka, sans-serif`;
-      ctx.fillText('SCRATCH HERE ✨', w / 2, h / 2);
+      const pl = window.CURRENT && window.CURRENT.lang === 'pl';
+      ctx.fillText(pl ? 'ZDRAP TUTAJ ✨' : 'SCRATCH HERE ✨', w / 2, h / 2);
     }
 
     function clearedFraction(ctx, canvas) {
@@ -939,7 +1003,7 @@ INVITED</span>
       canvas.classList.add('revealed');
       document.getElementById('scratch-prize').classList.add('pop');
       const hint = document.getElementById('scratch-hint');
-      if (hint) hint.textContent = 'Enjoy! 🥳';
+      if (hint) hint.textContent = (window.CURRENT && window.CURRENT.lang === 'pl') ? 'Bawcie się dobrze! 🥳' : 'Enjoy! 🥳';
       const dl = document.getElementById('gift-download');
       if (dl) dl.style.display = 'inline-flex';
       confetti();
@@ -1072,6 +1136,7 @@ INVITED</span>
     // Voucher is sized big so it stays legible when viewed full-screen on a phone.
     function downloadVoucher() {
       const g = window.CURRENT || { name: null, activity: '', terms: '' };
+      const pl = g.lang === 'pl';
       const W = 1080, H = 1650;
       const canvas = document.createElement('canvas');
       canvas.width = W; canvas.height = H;
@@ -1089,10 +1154,10 @@ INVITED</span>
 
       ctx.fillStyle = '#5e0404';
       ctx.font = "700 34px 'Fredoka', sans-serif";
-      ctx.fillText('★   OFFICIAL GIFT VOUCHER   ★', W / 2, 180);
+      ctx.fillText(pl ? '★   BON PODARUNKOWY   ★' : '★   OFFICIAL GIFT VOUCHER   ★', W / 2, 180);
 
       ctx.font = "600 96px 'Cormorant Garamond', serif";
-      ctx.fillText('Sanchari & Rafał', W / 2, 296);
+      ctx.fillText(pl ? 'Sanchari i Rafał' : 'Sanchari & Rafał', W / 2, 296);
 
       ctx.strokeStyle = '#d8b24a'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(W / 2 - 190, 342); ctx.lineTo(W / 2 + 190, 342); ctx.stroke();
@@ -1101,13 +1166,13 @@ INVITED</span>
       if (g.name) {
         ctx.fillStyle = '#3a3a3a';
         ctx.font = "500 42px 'Fredoka', sans-serif";
-        ctx.fillText('Presented to ' + g.name, W / 2, cursor);
+        ctx.fillText((pl ? 'Dla ' : 'Presented to ') + (g.greetName || g.name), W / 2, cursor);
         cursor += 82;
       }
 
       ctx.fillStyle = '#7a5b00';
       ctx.font = "500 34px 'Fredoka', sans-serif";
-      ctx.fillText('This voucher entitles the bearer to', W / 2, cursor);
+      ctx.fillText(pl ? 'Ten bon uprawnia do:' : 'This voucher entitles the bearer to', W / 2, cursor);
       cursor += 100;
 
       // the gift itself — the hero line
@@ -1139,10 +1204,10 @@ INVITED</span>
       drawSig('Rafał Maciejewski', 'Rafał Maciejewski', sig1);
       drawSig('Sanchari Das', 'Sanchari Das', sig2);
 
-      const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      const dateStr = new Date().toLocaleDateString(pl ? 'pl-PL' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       ctx.fillStyle = '#5e0404';
       ctx.font = "500 36px 'Fredoka', sans-serif";
-      ctx.fillText('Date of issue: ' + dateStr, W / 2, 1560);
+      ctx.fillText((pl ? 'Data wydania: ' : 'Date of issue: ') + dateStr, W / 2, 1560);
 
       const filename = 'voucher-' + (g.name ? g.name.toLowerCase() : 'gift') + '.png';
       saveOrSharePng(canvas.toDataURL('image/png'), filename);

@@ -20,6 +20,7 @@ window.GUESTS = {
   marcin:    { name: "Marcin",    key: "f871c222", prize: "This voucher entitles you to have a home cooked meal with us at our new place within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
   dhruvi:    { name: "Dhruvi",    key: "99e05b28", prize: "This voucher entitles you to have a badminton session with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
   clemence:     { name: "Clémence",       key: "a6ee2f37", prize: "This voucher entitles you to have a picnic in the park with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher. You can bring one person with you if you want." },
-  mariuszewa:   { name: "Mariusz & Ewa",  key: "61687f73", prize: "This voucher entitles you to have a home cooked meal with us at our new place within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher." },
-  maciekjulia:  { name: "Maciek & Julia", key: "b25cf353", prize: "This voucher entitles you to have an evening of board games with us within 2 weeks of redeeming it! Redeemable within a year of receiving the voucher." }
+  // Polish guests: whole invite renders in Polish (lang: 'pl'), with their own activity/terms.
+  mariuszewa:   { name: "Mariusz i Ewa",  greetName: "Mariusza i Ewy", key: "61687f73", lang: "pl", activity: "Domowy obiad z nami!", terms: "Ten bon uprawnia Was do domowego obiadu z nami w naszym nowym mieszkaniu w ciągu 2 tygodni od realizacji! Ważny przez rok od otrzymania." },
+  maciekjulia:  { name: "Maciek i Julia", greetName: "Maćka i Julii", key: "b25cf353", lang: "pl", activity: "Gry planszowe z nami!", terms: "Ten bon uprawnia Was do wieczoru gier planszowych z nami w ciągu 2 tygodni od realizacji! Ważny przez rok od otrzymania." }
 };
